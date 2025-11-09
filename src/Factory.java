@@ -5,7 +5,7 @@ public class Factory extends Building {
 
     @Override
     public void applyEffects(City city) {
-        city.updateBudget(500); // Generates revenue
-        city.updateStats(0, 0, -2); // Decreases environment
+        city.updateBudget(500);
+        city.updateStats(0, 0, -2);
     }
 }

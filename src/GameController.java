@@ -7,14 +7,24 @@ public class GameController {
     private boolean gameRunning;
 
     public GameController() {
-        this.city = new City();
         this.scanner = new Scanner(System.in);
         this.randomEvent = new RandomEvent();
         this.gameRunning = true;
     }
 
+    private void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
+
+    private void waitForEnter() {
+        System.out.println("\nPress ENTER to continue...");
+        scanner.nextLine();
+    }
+
     public void startGame() {
         displayWelcome();
+        selectCity();
 
         while (gameRunning && city.getCurrentTurn() <= 20) {
             playTurn();
@@ -33,12 +43,50 @@ public class GameController {
         scanner.close();
     }
 
+    private void selectCity() {
+        System.out.println("\n=== CHOOSE YOUR CITY ===");
+        System.out.println("1. New York");
+        System.out.println("2. Tokyo");
+        System.out.println("3. Paris");
+        System.out.println("4. London");
+        System.out.println("5. Custom Name");
+        System.out.print("\nSelect city (1-5): ");
+
+        try {
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            String cityName;
+            switch (choice) {
+                case 1: cityName = "New York"; break;
+                case 2: cityName = "Tokyo"; break;
+                case 3: cityName = "Paris"; break;
+                case 4: cityName = "London"; break;
+                case 5:
+                    System.out.print("Enter city name: ");
+                    cityName = scanner.nextLine();
+                    break;
+                default:
+                    cityName = "New City";
+            }
+
+            this.city = new City(cityName);
+            System.out.println("\nWelcome to " + cityName + ", Mayor!");
+            System.out.println("Press ENTER to begin your administration...");
+            scanner.nextLine();
+        } catch (Exception e) {
+            this.city = new City("New City");
+            scanner.nextLine();
+        }
+    }
+
     private void playTurn() {
-        System.out.println("\n" + "=".repeat(60));
+        clearScreen();
+
+        System.out.println("=".repeat(60));
         city.displayStatus();
         System.out.println("=".repeat(60));
 
-        // Generate random event (30% chance)
         randomEvent.generateEvent(city);
         if (randomEvent.hasEvent()) {
             randomEvent.displayEvent();
@@ -47,7 +95,6 @@ public class GameController {
         displayMenu();
         handlePlayerAction();
 
-        // End turn
         city.nextTurn();
     }
 
@@ -65,7 +112,7 @@ public class GameController {
     private void handlePlayerAction() {
         try {
             int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine();
 
             switch (choice) {
                 case 1:
@@ -84,14 +131,14 @@ public class GameController {
                     viewDetailedReport();
                     break;
                 case 6:
-                    System.out.println("\n⏭️  Ending turn...");
+                    System.out.println("\n⏭️ Ending turn...");
                     break;
                 default:
                     System.out.println("❌ Invalid choice! Turn skipped.");
             }
         } catch (Exception e) {
             System.out.println("❌ Invalid input! Turn skipped.");
-            scanner.nextLine(); // Clear buffer
+            scanner.nextLine();
         }
     }
 
@@ -137,6 +184,7 @@ public class GameController {
             System.out.println("❌ Invalid input!");
             scanner.nextLine();
         }
+        waitForEnter();
     }
 
     private void repairBuildings() {
@@ -148,6 +196,7 @@ public class GameController {
 
         if (damagedBuildings.isEmpty()) {
             System.out.println("✓ No damaged buildings!");
+            waitForEnter();
             return;
         }
 
@@ -171,7 +220,7 @@ public class GameController {
             }
 
             if (choice == damagedBuildings.size() + 1) {
-                // Repair all
+
                 double totalCost = damagedBuildings.stream()
                         .mapToDouble(Building::getRepairCost)
                         .sum();
@@ -199,6 +248,7 @@ public class GameController {
             System.out.println("❌ Invalid input!");
             scanner.nextLine();
         }
+        waitForEnter();
     }
 
     private void adjustTaxRate() {
@@ -215,7 +265,7 @@ public class GameController {
             int oldRate = city.getTaxRate();
             city.setTaxRate(newRate);
 
-            int happinessChange = (oldRate - newRate) * 2; // Each 1% change = 2 happiness points
+            int happinessChange = (oldRate - newRate) * 2;
             city.updateStats(happinessChange, 0, 0);
 
             System.out.println("✓ Tax rate set to " + city.getTaxRate() + "%");
@@ -228,6 +278,7 @@ public class GameController {
             System.out.println("❌ Invalid input!");
             scanner.nextLine();
         }
+        waitForEnter();
     }
 
     private void viewBuildingList() {
@@ -244,6 +295,7 @@ public class GameController {
         System.out.println("\nTotal buildings: " + city.getBuildings().size());
         System.out.println("Total maintenance cost per turn: $" +
                 city.getBuildings().stream().mapToDouble(Building::getMaintenanceCost).sum());
+        waitForEnter();
     }
 
     private void viewDetailedReport() {
@@ -265,6 +317,7 @@ public class GameController {
         System.out.println("Total Buildings: " + city.getBuildings().size());
         System.out.println("Damaged Buildings: " + damagedCount);
         System.out.println("Functional Buildings: " + (city.getBuildings().size() - damagedCount));
+        waitForEnter();
     }
 
     private boolean checkLoseConditions() {
@@ -296,7 +349,7 @@ public class GameController {
         System.out.println("- Build infrastructure to improve city stats");
         System.out.println("- Balance budget, happiness, safety, and environment");
         System.out.println("- Random events will challenge your management skills");
-        System.out.println("\n⚠️  Lose if:");
+        System.out.println("\n⚠️ Lose if:");
         System.out.println("- Budget reaches $0 or less");
         System.out.println("- Happiness drops below 20");
         System.out.println("- Population drops below 500");

@@ -11,13 +11,12 @@ public class RandomEvent {
     }
 
     public void generateEvent(City city) {
-        // 30% probability of an event occurring
+
         if (random.nextDouble() > 0.3) {
             type = EventType.NONE;
             return;
         }
 
-        // Randomly select an event
         EventType[] events = {EventType.FIRE, EventType.PROTEST, EventType.ECONOMIC_BOOM,
                                EventType.NATURAL_DISASTER, EventType.FESTIVAL_REQUEST};
         type = events[random.nextInt(events.length)];
@@ -55,10 +54,10 @@ public class RandomEvent {
             building.damage();
             description += "\n" + building.getName() + " has been damaged!";
             description += "\nRepair cost: $" + String.format("%.2f", building.getRepairCost());
-            city.updateBudget(-building.getRepairCost() * 0.5); // Immediate fire damage cost
+            city.updateBudget(-building.getRepairCost() * 0.5);
         } else {
             description += "\nFortunately, no buildings were damaged.";
-            city.updateBudget(-1000); // Still some cost for firefighting
+            city.updateBudget(-1000);
         }
         city.updateStats(-5, -3, -2);
     }

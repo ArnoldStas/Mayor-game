@@ -10,7 +10,7 @@ public abstract class Building {
         this.buildCost = buildCost;
         this.maintenanceCost = maintenanceCost;
         this.damaged = false;
-        this.repairCost = buildCost * 0.3; // Repair costs 30% of build cost
+        this.repairCost = buildCost * 0.3;
     }
 
     public abstract void applyEffects(City city);

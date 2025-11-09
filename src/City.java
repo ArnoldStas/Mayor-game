@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class City {
+    private String name;
     private int population;
     private double budget;
     private int happiness;
@@ -11,7 +12,8 @@ public class City {
     private List<Building> buildings;
     private int currentTurn;
 
-    public City() {
+    public City(String name) {
+        this.name = name;
         this.population = 1000;
         this.budget = 50000;
         this.happiness = 50;
@@ -48,23 +50,19 @@ public class City {
     public void nextTurn() {
         currentTurn++;
 
-        // Calculate tax revenue based on population and tax rate
         double taxRevenue = (population * taxRate * 0.1);
         budget += taxRevenue;
 
-        // Apply maintenance costs for all buildings
         for (Building building : buildings) {
             budget -= building.getMaintenanceCost();
         }
 
-        // Calculate population change based on happiness
         if (happiness > 70) {
-            updatePopulation((int)(population * 0.02)); // 2% growth
+            updatePopulation((int)(population * 0.02));
         } else if (happiness < 30) {
-            updatePopulation((int)(population * -0.02)); // 2% decline
+            updatePopulation((int)(population * -0.02));
         }
 
-        // Apply building effects
         for (Building building : buildings) {
             if (!building.isDamaged()) {
                 building.applyEffects(this);
@@ -76,7 +74,7 @@ public class City {
         return Math.max(min, Math.min(max, value));
     }
 
-    // Getters
+    public String getName() { return name; }
     public int getPopulation() { return population; }
     public double getBudget() { return budget; }
     public int getHappiness() { return happiness; }
@@ -86,7 +84,6 @@ public class City {
     public List<Building> getBuildings() { return buildings; }
     public int getCurrentTurn() { return currentTurn; }
 
-    // Setters
     public void setTaxRate(int taxRate) {
         this.taxRate = clamp(taxRate, 0, 50);
     }
@@ -108,7 +105,7 @@ public class City {
     }
 
     public void displayStatus() {
-        System.out.println("\n=== CITY STATUS ===");
+        System.out.println("\n=== " + name.toUpperCase() + " STATUS ===");
         System.out.println("Turn: " + currentTurn + "/20");
         System.out.println("Population: " + population);
         System.out.println("Budget: $" + String.format("%.2f", budget));
