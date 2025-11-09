@@ -1,9 +1,6 @@
 import java.util.Random;
 
 public class RandomEvent {
-    public enum EventType {
-        FIRE, PROTEST, ECONOMIC_BOOM, NATURAL_DISASTER, FESTIVAL_REQUEST, NONE
-    }
 
     private EventType type;
     private String description;
