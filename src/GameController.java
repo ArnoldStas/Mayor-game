@@ -37,7 +37,11 @@ public class GameController {
         }
 
         if (gameRunning && city.getCurrentTurn() > 20) {
-            displayVictory();
+            if (checkWinConditions()) {
+                displayVictory();
+            } else {
+                displayDefeat();
+            }
         }
 
         scanner.close();
@@ -93,9 +97,11 @@ public class GameController {
         }
 
         displayMenu();
-        handlePlayerAction();
+        boolean actionPerformed = handlePlayerAction();
 
-        city.nextTurn();
+        if (actionPerformed) {
+            city.nextTurn();
+        }
     }
 
     private void displayMenu() {
@@ -109,7 +115,7 @@ public class GameController {
         System.out.print("\nChoose action (1-6): ");
     }
 
-    private void handlePlayerAction() {
+    private boolean handlePlayerAction() {
         try {
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -117,28 +123,29 @@ public class GameController {
             switch (choice) {
                 case 1:
                     buildInfrastructure();
-                    break;
+                    return true;
                 case 2:
-                    repairBuildings();
-                    break;
+                    return repairBuildings();
                 case 3:
                     adjustTaxRate();
-                    break;
+                    return true;
                 case 4:
                     viewBuildingList();
-                    break;
+                    return false;
                 case 5:
                     viewDetailedReport();
-                    break;
+                    return false;
                 case 6:
                     System.out.println("\n⏭️ Ending turn...");
-                    break;
+                    return true;
                 default:
                     System.out.println("❌ Invalid choice! Turn skipped.");
+                    return false;
             }
         } catch (Exception e) {
             System.out.println("❌ Invalid input! Turn skipped.");
             scanner.nextLine();
+            return false;
         }
     }
 
@@ -187,7 +194,7 @@ public class GameController {
         waitForEnter();
     }
 
-    private void repairBuildings() {
+    private boolean repairBuildings() {
         System.out.println("\n=== REPAIR BUILDINGS ===");
 
         var damagedBuildings = city.getBuildings().stream()
@@ -197,7 +204,7 @@ public class GameController {
         if (damagedBuildings.isEmpty()) {
             System.out.println("✓ No damaged buildings!");
             waitForEnter();
-            return;
+            return false;
         }
 
         System.out.println("Damaged buildings:");
@@ -216,7 +223,8 @@ public class GameController {
 
             if (choice == damagedBuildings.size() + 2) {
                 System.out.println("❌ Cancelled.");
-                return;
+                waitForEnter();
+                return false;
             }
 
             if (choice == damagedBuildings.size() + 1) {
@@ -229,8 +237,12 @@ public class GameController {
                     city.updateBudget(-totalCost);
                     damagedBuildings.forEach(Building::repair);
                     System.out.println("✓ All buildings repaired! Cost: $" + String.format("%.2f", totalCost));
+                    waitForEnter();
+                    return true;
                 } else {
                     System.out.println("❌ Not enough budget! Need: $" + String.format("%.2f", totalCost));
+                    waitForEnter();
+                    return false;
                 }
             } else if (choice >= 1 && choice <= damagedBuildings.size()) {
                 Building building = damagedBuildings.get(choice - 1);
@@ -238,17 +250,24 @@ public class GameController {
                     city.updateBudget(-building.getRepairCost());
                     building.repair();
                     System.out.println("✓ " + building.getName() + " repaired!");
+                    waitForEnter();
+                    return true;
                 } else {
                     System.out.println("❌ Not enough budget!");
+                    waitForEnter();
+                    return false;
                 }
             } else {
                 System.out.println("❌ Invalid choice!");
+                waitForEnter();
+                return false;
             }
         } catch (Exception e) {
             System.out.println("❌ Invalid input!");
             scanner.nextLine();
+            waitForEnter();
+            return false;
         }
-        waitForEnter();
     }
 
     private void adjustTaxRate() {
@@ -265,7 +284,7 @@ public class GameController {
             int oldRate = city.getTaxRate();
             city.setTaxRate(newRate);
 
-            int happinessChange = (oldRate - newRate) * 2;
+            int happinessChange = (oldRate - newRate) * 3;
             city.updateStats(happinessChange, 0, 0);
 
             System.out.println("✓ Tax rate set to " + city.getTaxRate() + "%");
@@ -307,10 +326,11 @@ public class GameController {
                 .mapToDouble(Building::getMaintenanceCost)
                 .sum();
 
-        System.out.println("\n--- Financial Breakdown ---");
-        System.out.println("Tax Revenue per turn: $" + String.format("%.2f", taxRevenue));
-        System.out.println("Maintenance Cost per turn: $" + String.format("%.2f", maintenanceCost));
-        System.out.println("Net Income per turn: $" + String.format("%.2f", (taxRevenue - maintenanceCost)));
+        System.out.println("\n--- Financial Breakdown (Next Turn Projection) ---");
+        System.out.println("⚠️ NOTE: These are projections - no turn has been consumed yet!");
+        System.out.println("Tax Revenue next turn: $" + String.format("%.2f", taxRevenue));
+        System.out.println("Maintenance Cost next turn: $" + String.format("%.2f", maintenanceCost));
+        System.out.println("Net Income next turn: $" + String.format("%.2f", (taxRevenue - maintenanceCost)));
 
         long damagedCount = city.getBuildings().stream().filter(Building::isDamaged).count();
         System.out.println("\n--- Building Status ---");
@@ -339,6 +359,22 @@ public class GameController {
         return false;
     }
 
+    private boolean checkWinConditions() {
+        if (city.getHappiness() < 70) {
+            System.out.println("\n❌ FAIL! Citizens are not satisfied enough!");
+            System.out.println("Happiness: " + city.getHappiness() + "/100 (Need at least 70)");
+            return false;
+        }
+
+        if (city.getBudget() < 10000) {
+            System.out.println("\n❌ FAIL! City budget is too low!");
+            System.out.println("Budget: $" + String.format("%.2f", city.getBudget()) + " (Need at least $10,000)");
+            return false;
+        }
+
+        return true;
+    }
+
     private void displayWelcome() {
         System.out.println("\n" + "=".repeat(60));
         System.out.println("       🏙️  WELCOME TO CITY MAYOR SIMULATION  🏙️");
@@ -353,7 +389,11 @@ public class GameController {
         System.out.println("- Budget reaches $0 or less");
         System.out.println("- Happiness drops below 20");
         System.out.println("- Population drops below 500");
-        System.out.println("\n🏆 Win if: You survive all 20 turns!");
+        System.out.println("\n🏆 Win if:");
+        System.out.println("- You survive all 20 turns AND");
+        System.out.println("- Happiness is at least 70");
+        System.out.println("- Budget is at least $10,000");
+        System.out.println("\n⏰ Note: Viewing reports doesn't use turns!");
         System.out.println("\n" + "=".repeat(60));
         System.out.println("Press ENTER to start...");
         scanner.nextLine();
@@ -364,6 +404,16 @@ public class GameController {
         System.out.println("           ❌ GAME OVER ❌");
         System.out.println("=".repeat(60));
         System.out.println("\nYou were removed from office on Turn " + city.getCurrentTurn());
+        System.out.println("\nFinal Statistics:");
+        city.displayStatus();
+        System.out.println("\n" + "=".repeat(60));
+    }
+
+    private void displayDefeat() {
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("           ❌ YOU DID NOT WIN ❌");
+        System.out.println("=".repeat(60));
+        System.out.println("\nYou survived 20 turns, but did not meet the win conditions!");
         System.out.println("\nFinal Statistics:");
         city.displayStatus();
         System.out.println("\n" + "=".repeat(60));
