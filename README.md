@@ -63,13 +63,14 @@ Each turn you can:
 ### Win/Lose Conditions
 
 **You LOSE if:**
-- Budget reaches $10000 or less
+- Budget reaches $0 or less
 - Happiness drops below 20
 - Population drops below 500
 
 **You WIN if:**
 - Successfully complete all 20 turns
-- Happiness is above 70
+- Happiness is at least 70
+- Budget is at least $10000
 
 ## Game Features
 
