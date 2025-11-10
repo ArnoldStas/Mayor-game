@@ -69,6 +69,8 @@ Each turn you can:
 
 **You WIN if:**
 - Successfully complete all 20 turns
+- Happiness is at least 70
+- Budget is at least $10000
 
 ## Game Features
 
