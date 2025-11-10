@@ -122,13 +122,11 @@ public class GameController {
 
             switch (choice) {
                 case 1:
-                    buildInfrastructure();
-                    return true;
+                    return buildInfrastructure();
                 case 2:
                     return repairBuildings();
                 case 3:
-                    adjustTaxRate();
-                    return true;
+                    return adjustTaxRate();
                 case 4:
                     viewBuildingList();
                     return false;
@@ -149,7 +147,7 @@ public class GameController {
         }
     }
 
-    private void buildInfrastructure() {
+    private boolean buildInfrastructure() {
         System.out.println("\n=== BUILD INFRASTRUCTURE ===");
         System.out.println("1. Park           - Cost: $5,000  | Maintenance: $200  | Effect: +Happiness +Environment");
         System.out.println("2. Police Station - Cost: $10,000 | Maintenance: $500  | Effect: +Safety");
@@ -173,10 +171,12 @@ public class GameController {
                 case 5: building = new Factory(); break;
                 case 6:
                     System.out.println("❌ Cancelled.");
-                    return;
+                    waitForEnter();
+                    return false;
                 default:
                     System.out.println("❌ Invalid choice!");
-                    return;
+                    waitForEnter();
+                    return false;
             }
 
             if (city.getBudget() >= building.getBuildCost()) {
@@ -184,14 +184,19 @@ public class GameController {
                 city.addBuilding(building);
                 System.out.println("✓ " + building.getName() + " built successfully!");
                 System.out.println("Budget remaining: $" + String.format("%.2f", city.getBudget()));
+                waitForEnter();
+                return true;
             } else {
                 System.out.println("❌ Not enough budget! Need: $" + building.getBuildCost());
+                waitForEnter();
+                return false;
             }
         } catch (Exception e) {
             System.out.println("❌ Invalid input!");
             scanner.nextLine();
+            waitForEnter();
+            return false;
         }
-        waitForEnter();
     }
 
     private boolean repairBuildings() {
@@ -270,7 +275,7 @@ public class GameController {
         }
     }
 
-    private void adjustTaxRate() {
+    private boolean adjustTaxRate() {
         System.out.println("\n=== ADJUST TAX RATE ===");
         System.out.println("Current tax rate: " + city.getTaxRate() + "%");
         System.out.println("Note: Higher taxes increase revenue but decrease happiness");
@@ -293,11 +298,14 @@ public class GameController {
             } else if (happinessChange < 0) {
                 System.out.println("Citizens are upset! Happiness " + happinessChange);
             }
+            waitForEnter();
+            return true;
         } catch (Exception e) {
             System.out.println("❌ Invalid input!");
             scanner.nextLine();
+            waitForEnter();
+            return false;
         }
-        waitForEnter();
     }
 
     private void viewBuildingList() {
