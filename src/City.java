@@ -14,12 +14,12 @@ public class City {
 
     public City(String name) {
         this.name = name;
-        this.population = 1000;
-        this.budget = 50000;
-        this.happiness = 50;
-        this.safety = 50;
-        this.environment = 50;
-        this.taxRate = 10;
+        this.population = GameConstants.INITIAL_POPULATION;
+        this.budget = GameConstants.INITIAL_BUDGET;
+        this.happiness = GameConstants.INITIAL_HAPPINESS;
+        this.safety = GameConstants.INITIAL_SAFETY;
+        this.environment = GameConstants.INITIAL_ENVIRONMENT;
+        this.taxRate = GameConstants.INITIAL_TAX_RATE;
         this.buildings = new ArrayList<>();
         this.currentTurn = 1;
     }
@@ -33,9 +33,9 @@ public class City {
     }
 
     public void updateStats(int happinessChange, int safetyChange, int environmentChange) {
-        this.happiness = clamp(this.happiness + happinessChange, 0, 100);
-        this.safety = clamp(this.safety + safetyChange, 0, 100);
-        this.environment = clamp(this.environment + environmentChange, 0, 100);
+        this.happiness = clamp(this.happiness + happinessChange, GameConstants.MIN_STAT_VALUE, GameConstants.MAX_STAT_VALUE);
+        this.safety = clamp(this.safety + safetyChange, GameConstants.MIN_STAT_VALUE, GameConstants.MAX_STAT_VALUE);
+        this.environment = clamp(this.environment + environmentChange, GameConstants.MIN_STAT_VALUE, GameConstants.MAX_STAT_VALUE);
     }
 
     public void updateBudget(double amount) {
@@ -50,17 +50,17 @@ public class City {
     public void nextTurn() {
         currentTurn++;
 
-        double taxRevenue = (population * taxRate * 0.1);
+        double taxRevenue = (population * taxRate * GameConstants.TAX_REVENUE_MULTIPLIER);
         budget += taxRevenue;
 
         for (Building building : buildings) {
             budget -= building.getMaintenanceCost();
         }
 
-        if (happiness > 70) {
-            updatePopulation((int)(population * 0.02));
-        } else if (happiness < 30) {
-            updatePopulation((int)(population * -0.02));
+        if (happiness > GameConstants.HAPPINESS_THRESHOLD_FOR_GROWTH) {
+            updatePopulation((int)(population * GameConstants.POPULATION_GROWTH_RATE));
+        } else if (happiness < GameConstants.HAPPINESS_THRESHOLD_FOR_DECLINE) {
+            updatePopulation((int)(population * -GameConstants.POPULATION_DECLINE_RATE));
         }
 
         for (Building building : buildings) {
@@ -85,7 +85,7 @@ public class City {
     public int getCurrentTurn() { return currentTurn; }
 
     public void setTaxRate(int taxRate) {
-        this.taxRate = clamp(taxRate, 0, 50);
+        this.taxRate = clamp(taxRate, GameConstants.MIN_TAX_RATE, GameConstants.MAX_TAX_RATE);
     }
 
     public void setBudget(double budget) {
@@ -93,20 +93,20 @@ public class City {
     }
 
     public void setHappiness(int happiness) {
-        this.happiness = clamp(happiness, 0, 100);
+        this.happiness = clamp(happiness, GameConstants.MIN_STAT_VALUE, GameConstants.MAX_STAT_VALUE);
     }
 
     public void setSafety(int safety) {
-        this.safety = clamp(safety, 0, 100);
+        this.safety = clamp(safety, GameConstants.MIN_STAT_VALUE, GameConstants.MAX_STAT_VALUE);
     }
 
     public void setEnvironment(int environment) {
-        this.environment = clamp(environment, 0, 100);
+        this.environment = clamp(environment, GameConstants.MIN_STAT_VALUE, GameConstants.MAX_STAT_VALUE);
     }
 
     public void displayStatus() {
         System.out.println("\n=== " + name.toUpperCase() + " STATUS ===");
-        System.out.println("Turn: " + currentTurn + "/20");
+        System.out.println("Turn: " + currentTurn + "/" + GameConstants.MAX_TURNS);
         System.out.println("Population: " + population);
         System.out.println("Budget: $" + String.format("%.2f", budget));
         System.out.println("Happiness: " + happiness + "/100");

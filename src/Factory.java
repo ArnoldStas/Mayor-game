@@ -1,11 +1,11 @@
 public class Factory extends Building {
     public Factory() {
-        super("Factory", 20000, 1000);
+        super("Factory", GameConstants.FACTORY_BUILD_COST, GameConstants.FACTORY_MAINTENANCE);
     }
 
     @Override
     public void applyEffects(City city) {
-        city.updateBudget(500);
-        city.updateStats(0, 0, -2);
+        city.updateBudget(GameConstants.FACTORY_REVENUE);
+        city.updateStats(0, 0, GameConstants.FACTORY_ENVIRONMENT_PENALTY);
     }
 }

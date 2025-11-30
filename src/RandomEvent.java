@@ -1,120 +1,53 @@
 import java.util.Random;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RandomEvent {
 
-    private EventType type;
+    private EventStrategy currentStrategy;
     private String description;
     private Random random;
+    private Map<EventType, EventStrategy> strategies;
 
     public RandomEvent() {
         this.random = new Random();
+        this.strategies = new HashMap<>();
+        initializeStrategies();
+    }
+
+    private void initializeStrategies() {
+        strategies.put(EventType.FIRE, new FireEventStrategy());
+        strategies.put(EventType.PROTEST, new ProtestEventStrategy());
+        strategies.put(EventType.ECONOMIC_BOOM, new EconomicBoomStrategy());
+        strategies.put(EventType.NATURAL_DISASTER, new NaturalDisasterStrategy());
+        strategies.put(EventType.FESTIVAL_REQUEST, new FestivalRequestStrategy());
     }
 
     public void generateEvent(City city) {
-
-        if (random.nextDouble() > 0.3) {
-            type = EventType.NONE;
+        if (random.nextDouble() > GameConstants.EVENT_PROBABILITY) {
+            currentStrategy = null;
+            description = null;
             return;
         }
 
-        EventType[] events = {EventType.FIRE, EventType.PROTEST, EventType.ECONOMIC_BOOM,
-                               EventType.NATURAL_DISASTER, EventType.FESTIVAL_REQUEST};
-        type = events[random.nextInt(events.length)];
+        EventType[] events = {
+            EventType.FIRE,
+            EventType.PROTEST,
+            EventType.ECONOMIC_BOOM,
+            EventType.NATURAL_DISASTER,
+            EventType.FESTIVAL_REQUEST
+        };
 
-        applyEvent(city);
-    }
+        EventType selectedType = events[random.nextInt(events.length)];
+        currentStrategy = strategies.get(selectedType);
 
-    private void applyEvent(City city) {
-        switch (type) {
-            case FIRE:
-                handleFire(city);
-                break;
-            case PROTEST:
-                handleProtest(city);
-                break;
-            case ECONOMIC_BOOM:
-                handleEconomicBoom(city);
-                break;
-            case NATURAL_DISASTER:
-                handleNaturalDisaster(city);
-                break;
-            case FESTIVAL_REQUEST:
-                handleFestivalRequest(city);
-                break;
-            case NONE:
-                break;
-        }
-    }
-
-    private void handleFire(City city) {
-        description = "🔥 A FIRE broke out in the city!";
-
-        if (!city.getBuildings().isEmpty()) {
-            Building building = city.getBuildings().get(random.nextInt(city.getBuildings().size()));
-            building.damage();
-            description += "\n" + building.getName() + " has been damaged!";
-            description += "\nRepair cost: $" + String.format("%.2f", building.getRepairCost());
-            city.updateBudget(-building.getRepairCost() * 0.5);
-        } else {
-            description += "\nFortunately, no buildings were damaged.";
-            city.updateBudget(-1000);
-        }
-        city.updateStats(-5, -3, -2);
-    }
-
-    private void handleProtest(City city) {
-        description = "📢 Citizens are PROTESTING against current policies!";
-        city.updateStats(-10, -5, 0);
-        description += "\nHappiness decreased by 10, Safety decreased by 5.";
-    }
-
-    private void handleEconomicBoom(City city) {
-        description = "💰 ECONOMIC BOOM! The city's economy is thriving!";
-        double bonus = 5000 + (city.getPopulation() * 2);
-        city.updateBudget(bonus);
-        city.updateStats(5, 0, 0);
-        description += "\nBudget increased by $" + String.format("%.2f", bonus);
-        description += "\nHappiness increased by 5.";
-    }
-
-    private void handleNaturalDisaster(City city) {
-        description = "⚠️ NATURAL DISASTER struck the city!";
-
-        int damageCount = Math.min(3, city.getBuildings().size());
-        for (int i = 0; i < damageCount; i++) {
-            if (!city.getBuildings().isEmpty()) {
-                Building building = city.getBuildings().get(random.nextInt(city.getBuildings().size()));
-                building.damage();
-            }
-        }
-
-        double cost = 3000 + (city.getPopulation() * 1.5);
-        city.updateBudget(-cost);
-        city.updateStats(-15, -10, -10);
-
-        description += "\n" + damageCount + " buildings damaged!";
-        description += "\nEmergency response cost: $" + String.format("%.2f", cost);
-        description += "\nAll city stats significantly decreased.";
-    }
-
-    private void handleFestivalRequest(City city) {
-        description = "🎉 Citizens are requesting a FESTIVAL to boost morale!";
-        description += "\nCost: $3000";
-        description += "\nWould boost happiness by 15.";
-        description += "\n(This is automatically approved if you have the budget)";
-
-        if (city.getBudget() >= 3000) {
-            city.updateBudget(-3000);
-            city.updateStats(15, 0, 0);
-            description += "\n✓ Festival held successfully!";
-        } else {
-            description += "\n✗ Not enough budget! Citizens are disappointed.";
-            city.updateStats(-5, 0, 0);
+        if (currentStrategy != null) {
+            description = currentStrategy.execute(city);
         }
     }
 
     public EventType getType() {
-        return type;
+        return currentStrategy != null ? currentStrategy.getEventType() : EventType.NONE;
     }
 
     public String getDescription() {
@@ -122,7 +55,7 @@ public class RandomEvent {
     }
 
     public boolean hasEvent() {
-        return type != EventType.NONE;
+        return currentStrategy != null;
     }
 
     public void displayEvent() {

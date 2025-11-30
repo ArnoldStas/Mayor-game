@@ -1,10 +1,10 @@
 public class Park extends Building {
     public Park() {
-        super("Park", 5000, 200);
+        super("Park", GameConstants.PARK_BUILD_COST, GameConstants.PARK_MAINTENANCE);
     }
 
     @Override
     public void applyEffects(City city) {
-        city.updateStats(2, 0, 2);
+        city.updateStats(GameConstants.PARK_HAPPINESS_BOOST, 0, GameConstants.PARK_ENVIRONMENT_BOOST);
     }
 }

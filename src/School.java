@@ -1,11 +1,11 @@
 public class School extends Building {
     public School() {
-        super("School", 12000, 600);
+        super("School", GameConstants.SCHOOL_BUILD_COST, GameConstants.SCHOOL_MAINTENANCE);
     }
 
     @Override
     public void applyEffects(City city) {
-        city.updateStats(3, 0, 0);
-        city.updatePopulation(5);
+        city.updateStats(GameConstants.SCHOOL_HAPPINESS_BOOST, 0, 0);
+        city.updatePopulation(GameConstants.SCHOOL_POPULATION_BOOST);
     }
 }

@@ -10,7 +10,7 @@ public abstract class Building {
         this.buildCost = buildCost;
         this.maintenanceCost = maintenanceCost;
         this.damaged = false;
-        this.repairCost = buildCost * 0.3;
+        this.repairCost = buildCost * GameConstants.REPAIR_COST_MULTIPLIER;
     }
 
     public abstract void applyEffects(City city);
