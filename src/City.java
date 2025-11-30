@@ -2,6 +2,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class City {
+    private static final int INITIAL_POPULATION = 1000;
+    private static final double INITIAL_BUDGET = 50000.0;
+    private static final int INITIAL_HAPPINESS = 50;
+    private static final int INITIAL_SAFETY = 50;
+    private static final int INITIAL_ENVIRONMENT = 50;
+    private static final int DEFAULT_TAX_RATE = 10;
+    private static final int INITIAL_TURN = 1;
+    private static final double TAX_REVENUE_MULTIPLIER = 0.1;
+    private static final int HAPPINESS_GROWTH_THRESHOLD = 70;
+    private static final int HAPPINESS_DECLINE_THRESHOLD = 30;
+    private static final double POPULATION_GROWTH_RATE = 0.02;
+
     private String name;
     private int population;
     private double budget;
@@ -14,14 +26,14 @@ public class City {
 
     public City(String name) {
         this.name = name;
-        this.population = GameConstants.INITIAL_POPULATION;
-        this.budget = GameConstants.INITIAL_BUDGET;
-        this.happiness = GameConstants.INITIAL_HAPPINESS;
-        this.safety = GameConstants.INITIAL_SAFETY;
-        this.environment = GameConstants.INITIAL_ENVIRONMENT;
-        this.taxRate = GameConstants.INITIAL_TAX_RATE;
+        this.population = INITIAL_POPULATION;
+        this.budget = INITIAL_BUDGET;
+        this.happiness = INITIAL_HAPPINESS;
+        this.safety = INITIAL_SAFETY;
+        this.environment = INITIAL_ENVIRONMENT;
+        this.taxRate = DEFAULT_TAX_RATE;
         this.buildings = new ArrayList<>();
-        this.currentTurn = 1;
+        this.currentTurn = INITIAL_TURN;
     }
 
     public void addBuilding(Building building) {
@@ -50,17 +62,17 @@ public class City {
     public void nextTurn() {
         currentTurn++;
 
-        double taxRevenue = (population * taxRate * GameConstants.TAX_REVENUE_MULTIPLIER);
+        double taxRevenue = (population * taxRate * TAX_REVENUE_MULTIPLIER);
         budget += taxRevenue;
 
         for (Building building : buildings) {
             budget -= building.getMaintenanceCost();
         }
 
-        if (happiness > GameConstants.HAPPINESS_THRESHOLD_FOR_GROWTH) {
-            updatePopulation((int)(population * GameConstants.POPULATION_GROWTH_RATE));
-        } else if (happiness < GameConstants.HAPPINESS_THRESHOLD_FOR_DECLINE) {
-            updatePopulation((int)(population * -GameConstants.POPULATION_DECLINE_RATE));
+        if (happiness > HAPPINESS_GROWTH_THRESHOLD) {
+            updatePopulation((int)(population * POPULATION_GROWTH_RATE));
+        } else if (happiness < HAPPINESS_DECLINE_THRESHOLD) {
+            updatePopulation((int)(population * -POPULATION_GROWTH_RATE));
         }
 
         for (Building building : buildings) {
